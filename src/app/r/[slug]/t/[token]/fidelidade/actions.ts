@@ -1,6 +1,6 @@
 "use server";
 
-import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { connectDB } from "@/lib/mongodb";
 import { findTable } from "@/lib/tables";
@@ -15,6 +15,7 @@ import {
   type CardView,
 } from "@/lib/loyalty";
 import { Customer } from "@/models/Customer";
+import { Staff } from "@/models/Staff";
 
 export type CardResult = { ok: boolean; error?: string; card?: CardView | null };
 
@@ -110,7 +111,7 @@ export async function stampVisit(slug: string, token: string): Promise<CardResul
   return { ok: true, card: toCardView(updated, ctx.restaurant.loyalty) };
 }
 
-// O atendente digita o PIN no celular do cliente para confirmar a entrega do prêmio.
+// O garçom digita o PIN pessoal dele no celular do cliente para confirmar a entrega do prêmio.
 export async function redeemReward(slug: string, token: string, pin: string): Promise<CardResult> {
   const ctx = await context(slug, token);
   if (!ctx) return fail("Mesa inválida. Escaneie o QR Code novamente.");
@@ -118,16 +119,19 @@ export async function redeemReward(slug: string, token: string, pin: string): Pr
 
   const required = ctx.restaurant.loyalty?.stampsRequired ?? 9;
   if (ctx.customer.stamps < required) return fail("O prêmio ainda não foi liberado.");
-  if (!ctx.restaurant.staffPinHash) return fail("O resgate ainda não está configurado neste restaurante.");
 
   const lockedUntil = ctx.customer.pinLockedUntil;
   if (lockedUntil && lockedUntil > new Date()) {
     return fail("Muitas tentativas. Tente de novo mais tarde ou chame o gerente.");
   }
 
-  const given = Buffer.from(hashPin(String(pin).trim(), ctx.restaurant.slug));
-  const real = Buffer.from(ctx.restaurant.staffPinHash);
-  const correct = given.length === real.length && timingSafeEqual(given, real);
+  // Vale o PIN de qualquer garçom ativo deste restaurante (quem confirma fica registrado pelo próprio PIN).
+  const waiter = await Staff.findOne({
+    restaurant: ctx.restaurant._id,
+    pinHash: hashPin(String(pin).trim(), ctx.restaurant.slug),
+    active: true,
+  }).lean();
+  const correct = Boolean(waiter);
 
   if (!correct) {
     const fails = (ctx.customer.pinFails ?? 0) + 1;

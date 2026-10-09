@@ -25,7 +25,9 @@ const RestaurantSchema = new Schema(
       stampsRequired: { type: Number, default: 9 },
       reward: { type: String, default: "" },
     },
-    // PIN do atendente (guardado embaralhado) para confirmar o resgate do prêmio.
+    // Senha do dono para o painel (guardada embaralhada, com sal próprio): "sal:hash".
+    ownerPasswordHash: { type: String, default: "" },
+    // (campo antigo) PIN único de resgate; hoje o resgate usa o PIN de qualquer garçom ativo.
     staffPinHash: { type: String, default: "" },
     contactEmail: { type: String, default: "" }, // contato para pedidos de privacidade (LGPD)
     // Validação de presença (opcional): IPs públicos do Wi-Fi do restaurante. Vazio = desligado.

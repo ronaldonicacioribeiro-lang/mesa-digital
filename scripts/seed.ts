@@ -85,9 +85,25 @@ const restaurants = [
   },
 ];
 
-// PIN do atendente de DEMONSTRAÇÃO. Num cliente real, defina outro (nunca deixe no repositório).
-const DEMO_PIN = process.env.DEMO_STAFF_PIN ?? "1234";
 const hashPin = (pin: string, slug: string) => scryptSync(pin, `pin:${slug}`, 32).toString("hex");
+
+// Senha do painel do dono: NUNCA fica escrita no código (o repositório é público). O seed gera uma senha
+// aleatória e mostra no terminal uma única vez; anote. Para escolher a sua, defina a variável de ambiente
+// DEMO_OWNER_PASSWORD_BRASA_E_BUN (ou _VILLA_VERDE). O dono pode trocá-la depois no painel (Ajustes).
+const hashPassword = (pw: string) => {
+  const salt = randomBytes(16).toString("hex");
+  return `${salt}:${scryptSync(pw, salt, 32).toString("hex")}`;
+};
+function novaSenhaDoDono(slug: string) {
+  const fixa = process.env[`DEMO_OWNER_PASSWORD_${slug.toUpperCase().replace(/-/g, "_")}`];
+  const senha = fixa ?? randomBytes(9).toString("base64url");
+  console.log(`  senha do painel do dono de "${slug}": ${senha}   (anote agora${fixa ? "" : "; não será mostrada de novo"})`);
+  return hashPassword(senha);
+}
+
+// Por padrão o seed NÃO mexe em restaurante que já existe (para não apagar o que o dono editou no painel).
+// Para voltar um restaurante de exemplo ao estado original:  npm run seed -- --reset
+const RESET = process.argv.includes("--reset");
 
 const novoToken = () => randomBytes(9).toString("base64url"); // 12 caracteres, difícil de adivinhar
 
@@ -98,11 +114,33 @@ async function main() {
 
   for (const r of restaurants) {
     const { tables, items, staff, ...dados } = r;
-    const rest = await Restaurant.findOneAndUpdate({ slug: dados.slug }, { ...dados, staffPinHash: hashPin(DEMO_PIN, dados.slug) }, {
-      upsert: true,
-      returnDocument: "after",
-      setDefaultsOnInsert: true,
-    });
+    const existing = await Restaurant.findOne({ slug: dados.slug }).lean();
+
+    // Restaurante já existe e não pediram --reset: só garante o que faltar, sem sobrescrever nada.
+    if (existing && !RESET) {
+      if (!existing.ownerPasswordHash) {
+        await Restaurant.updateOne(
+          { _id: existing._id },
+          { $set: { ownerPasswordHash: novaSenhaDoDono(dados.slug) } },
+        );
+        console.log(`• ${existing.name}: senha do painel do dono definida`);
+      }
+      for (const s of staff) {
+        await Staff.updateOne(
+          { restaurant: existing._id, name: s.name },
+          { $setOnInsert: { pinHash: hashPin(s.pin, dados.slug), active: true } },
+          { upsert: true },
+        );
+      }
+      console.log(`✔ ${existing.name}: já existe, mantido como está (use --reset para recriar)`);
+      continue;
+    }
+
+    const rest = await Restaurant.findOneAndUpdate(
+      { slug: dados.slug },
+      { ...dados, ownerPasswordHash: novaSenhaDoDono(dados.slug) },
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
+    );
 
     // Mesas: cria só as que faltam (mantém o token das que já existem).
     for (let n = 1; n <= tables; n++) {
@@ -122,7 +160,7 @@ async function main() {
       );
     }
 
-    // Cardápio: recria do zero a cada execução.
+    // Cardápio: recria do zero.
     await MenuItem.deleteMany({ restaurant: rest._id });
     const categorias = [...new Set(items.map((i) => i.category))];
     await MenuItem.insertMany(
@@ -145,7 +183,7 @@ async function main() {
       })),
     );
 
-    console.log(`✔ ${rest.name}: ${tables} mesas, ${items.length} itens, ${staff.length} garçons`);
+    console.log(`✔ ${rest.name}: ${tables} mesas, ${items.length} itens, ${staff.length} garçons (recriado)`);
   }
 
   await mongoose.disconnect();

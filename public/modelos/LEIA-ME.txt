@@ -1,0 +1,20 @@
+MODELOS 3D DOS PRATOS (realidade aumentada)
+
+Hoje NÃO existe nenhum modelo 3D de prato. O arquivo teste-cubo.glb é só um cubo para testar a tecnologia.
+
+Como adicionar o modelo de um prato:
+
+1. Coloque o arquivo nesta pasta:
+   - GLB (obrigatório): ex. pizza-margherita.glb   (de 1 a 5 MB, de preferência)
+   - USDZ (opcional, para iPhone): ex. pizza-margherita.usdz
+     Sem o USDZ, o iPhone converte o GLB sozinho; com o USDZ a qualidade costuma ser melhor.
+2. Em scripts/seed.ts, no item do prato, acrescente:
+     model: "/modelos/pizza-margherita.glb",
+     modelUsdz: "/modelos/pizza-margherita.usdz",   // opcional
+3. Rode no terminal:  npm run seed
+4. Pronto: o prato passa a mostrar a etiqueta "3D" na lista e o botão
+   "Veja seu prato na mesa" na tela do prato.
+
+Como obter o modelo: veja a conversa do projeto (fotogrametria com Polycam/Luma/Kiri Engine,
+ou geração por IA com Meshy/Tripo, ou um artista 3D). Confira sempre o resultado: tamanho
+do prato real, textura e o verso do modelo.

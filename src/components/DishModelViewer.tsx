@@ -96,6 +96,8 @@ export function DishModelViewer({ glb, usdz, poster, name, colors: c }: Props) {
             ar-modes="webxr scene-viewer quick-look"
             ar-scale="fixed"
             camera-controls
+            camera-orbit="0deg 50deg auto"
+            interaction-prompt="none"
             auto-rotate
             shadow-intensity="1"
             touch-action="pan-y"

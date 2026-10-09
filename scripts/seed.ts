@@ -78,6 +78,18 @@ const restaurants = [
       { category: "Pratos principais", name: "Filé ao Molho Madeira", description: "Filé mignon grelhado, molho madeira, purê de batata e legumes.", price: 78, promo: 69.9 },
       { category: "Pratos principais", name: "Salmão Grelhado", description: "Salmão com crosta de ervas, arroz de amêndoas e aspargos.", price: 84 },
       { category: "Pratos principais", name: "Massa ao Pesto", description: "Fettuccine artesanal, pesto de manjericão e tomate cereja.", price: 52, available: false },
+      // Pizza de DEMONSTRAÇÃO com foto, vídeo e modelo 3D de verdade (arquivos em public/).
+      {
+        category: "Pizzas",
+        name: "Pizza Calabresa",
+        description: "Mussarela, fatias de calabresa e cebola, finalizada com orégano. Borda alta, assada no forno.",
+        price: 58,
+        featured: true,
+        image: "/pratos/pizza-calabresa.jpg",
+        video: "/pratos/pizza-calabresa.mp4",
+        poster: "/pratos/pizza-calabresa-poster.jpg",
+        model: "/modelos/pizza-calabresa.glb",
+      },
       { category: "Sobremesas", name: "Petit Gâteau", description: "Bolinho de chocolate com sorvete de baunilha.", price: 30, featured: true },
       { category: "Bebidas", name: "Suco natural", description: "Laranja, limão ou maracujá. 400 ml.", price: 12 },
       { category: "Bebidas", name: "Vinho da casa (taça)", description: "Tinto ou branco, seleção do sommelier.", price: 26 },

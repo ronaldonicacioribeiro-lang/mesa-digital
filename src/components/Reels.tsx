@@ -146,6 +146,7 @@ function Slide({ index, item, active, near, muted, colors, onOpen3D }: SlideProp
   const [showPhoto, setShowPhoto] = useState(false);
   const [paused, setPaused] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [landscape, setLandscape] = useState(false); // vídeo horizontal: mostra inteiro em vez de cortar as laterais
 
   const hasVideo = Boolean(item.videoUrl);
   const playing = hasVideo && !showPhoto && active && !paused;
@@ -175,7 +176,8 @@ function Slide({ index, item, active, near, muted, colors, onOpen3D }: SlideProp
           loop
           playsInline
           preload={near ? "auto" : "none"}
-          className="absolute inset-0 h-full w-full object-cover"
+          onLoadedMetadata={(e) => setLandscape(e.currentTarget.videoWidth > e.currentTarget.videoHeight)}
+          className={`absolute inset-0 h-full w-full ${landscape ? "bg-black object-contain" : "object-cover"}`}
         />
       ) : (
         <DishImage

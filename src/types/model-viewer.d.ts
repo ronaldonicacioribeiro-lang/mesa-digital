@@ -14,6 +14,8 @@ type ModelViewerAttributes = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTML
   "auto-rotate"?: boolean;
   "shadow-intensity"?: string;
   "touch-action"?: string;
+  "camera-orbit"?: string;
+  "interaction-prompt"?: string;
   loading?: "auto" | "lazy" | "eager";
   reveal?: "auto" | "manual";
 };

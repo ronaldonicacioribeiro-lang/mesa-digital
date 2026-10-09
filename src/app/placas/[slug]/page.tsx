@@ -47,6 +47,10 @@ async function Placas({ params }: { params: Promise<{ slug: string }> }) {
         Os QR apontam para <code>{base}</code>. Para testar no celular, abra esta página no PC usando o
         endereço da rede (ex.: http://192.168.x.x:3000/placas/{restaurant.slug}) e escaneie.
       </p>
+      <p className="mb-2 text-sm">
+        Equipe: <a className="underline" href={`/equipe/${restaurant.slug}`}>painel</a> ·{" "}
+        <a className="underline" href={`/equipe/${restaurant.slug}/tv`}>modo TV</a>
+      </p>
       <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
         {cards.map((c) => (
           <a key={c.number} href={c.url} className="rounded-lg border p-3 text-center">

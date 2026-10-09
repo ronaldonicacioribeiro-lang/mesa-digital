@@ -33,7 +33,10 @@ async function Mesa({ params }: { params: Params }) {
       tableNumber={table.number}
       instagram={restaurant.instagram}
       googleReviewUrl={restaurant.googleReviewUrl}
+      slug={restaurant.slug}
+      token={token}
       hrefs={{
+        service: `${base}/atendimento`,
         menu: `${base}/cardapio`,
         feedback: `${base}/feedback`,
         game: `${base}/jogo`,

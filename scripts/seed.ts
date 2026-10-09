@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import { Restaurant } from "../src/models/Restaurant";
 import { Table } from "../src/models/Table";
 import { MenuItem } from "../src/models/MenuItem";
+import { Staff } from "../src/models/Staff";
 
 type Item = {
   category: string;
@@ -37,6 +38,11 @@ const restaurants = [
     loyalty: { stampsRequired: 9, reward: "Um brownie com sorvete por conta da casa" },
     contactEmail: "contato@brasaebun.exemplo",
     tables: 12,
+    // Garçons de DEMONSTRAÇÃO (PIN pessoal). Num cliente real, cadastre os funcionários verdadeiros.
+    staff: [
+      { name: "Carlos", pin: "1111" },
+      { name: "Ana", pin: "2222" },
+    ],
     items: [
       { category: "Hambúrgueres", name: "Brasa Clássico", description: "Blend 160 g, queijo prato, alface, tomate e molho da casa.", price: 32, featured: true },
       { category: "Hambúrgueres", name: "Duplo Cheddar Bacon", description: "Dois blends de 120 g, cheddar cremoso, bacon crocante e cebola caramelizada.", price: 44, promo: 39.9, featured: true },
@@ -61,6 +67,10 @@ const restaurants = [
     loyalty: { stampsRequired: 9, reward: "Uma sobremesa à escolha por conta da casa" },
     contactEmail: "contato@villaverde.exemplo",
     tables: 20,
+    staff: [
+      { name: "Marcos", pin: "3333" },
+      { name: "Júlia", pin: "4444" },
+    ],
     items: [
       { category: "Entradas", name: "Bruschetta de Tomate", description: "Pão italiano, tomate fresco, manjericão e azeite extravirgem.", price: 28 },
       { category: "Entradas", name: "Carpaccio de Carne", description: "Lâminas de filé, rúcula, parmesão e alcaparras.", price: 46, featured: true },
@@ -87,7 +97,7 @@ async function main() {
   await mongoose.connect(uri);
 
   for (const r of restaurants) {
-    const { tables, items, ...dados } = r;
+    const { tables, items, staff, ...dados } = r;
     const rest = await Restaurant.findOneAndUpdate({ slug: dados.slug }, { ...dados, staffPinHash: hashPin(DEMO_PIN, dados.slug) }, {
       upsert: true,
       returnDocument: "after",
@@ -99,6 +109,15 @@ async function main() {
       await Table.updateOne(
         { restaurant: rest._id, number: n },
         { $setOnInsert: { token: novoToken(), active: true } },
+        { upsert: true },
+      );
+    }
+
+    // Garçons: cria ou atualiza pelo nome (o PIN fica guardado embaralhado).
+    for (const s of staff) {
+      await Staff.updateOne(
+        { restaurant: rest._id, name: s.name },
+        { $set: { pinHash: hashPin(s.pin, dados.slug), active: true } },
         { upsert: true },
       );
     }
@@ -126,7 +145,7 @@ async function main() {
       })),
     );
 
-    console.log(`✔ ${rest.name}: ${tables} mesas, ${items.length} itens`);
+    console.log(`✔ ${rest.name}: ${tables} mesas, ${items.length} itens, ${staff.length} garçons`);
   }
 
   await mongoose.disconnect();

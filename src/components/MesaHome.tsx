@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icon";
+import { CallWaiterButton } from "@/components/CallWaiterButton";
 
 type Props = {
   name: string;
@@ -8,7 +9,9 @@ type Props = {
   tableNumber: number;
   instagram: string;
   googleReviewUrl: string;
-  hrefs: { menu: string; feedback: string; game: string; loyalty: string; wifi?: string };
+  slug: string;
+  token: string;
+  hrefs: { service: string; menu: string; feedback: string; game: string; loyalty: string; wifi?: string };
   colors: { primary: string; secondary: string; background: string; text: string };
 };
 
@@ -17,7 +20,7 @@ type Button = { icon: IconName; label: string; href?: string; external?: boolean
 // Botões da tela da mesa. Sem `href` = função ainda não construída (vem nas próximas fases).
 function buttons({ hrefs, googleReviewUrl }: Pick<Props, "hrefs" | "googleReviewUrl">): Button[] {
   return [
-    { icon: "receipt", label: "Pedir a conta" },
+    { icon: "receipt", label: "Pedir a conta", href: hrefs.service },
     { icon: "book", label: "Ver cardápio", href: hrefs.menu },
     { icon: "star", label: "Cartão fidelidade", href: hrefs.loyalty },
     // Google: link direto para o formulário de avaliação, igual para todos os clientes.
@@ -38,7 +41,7 @@ function SoonBadge({ color }: { color: string }) {
   );
 }
 
-export function MesaHome({ name, tagline, logoText, tableNumber, instagram, googleReviewUrl, hrefs, colors: c }: Props) {
+export function MesaHome({ name, tagline, logoText, tableNumber, instagram, googleReviewUrl, slug, token, hrefs, colors: c }: Props) {
   const tile =
     "flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border bg-white p-3 text-center text-sm font-semibold shadow-sm disabled:opacity-60";
 
@@ -72,18 +75,7 @@ export function MesaHome({ name, tagline, logoText, tableNumber, instagram, goog
       <section className="flex flex-col gap-3">
         <h2 className="text-center text-lg font-semibold">Como podemos ajudar?</h2>
 
-        <button
-          type="button"
-          disabled
-          className="flex w-full flex-col items-center justify-center gap-2 rounded-2xl px-6 py-6 text-xl font-bold shadow-md disabled:opacity-90"
-          style={{ background: c.primary, color: c.secondary }}
-        >
-          <span className="flex items-center gap-3">
-            <Icon name="bell" className="h-8 w-8" />
-            Chamar garçom
-          </span>
-          <SoonBadge color="rgba(0,0,0,0.35)" />
-        </button>
+        <CallWaiterButton slug={slug} token={token} href={hrefs.service} colors={c} />
 
         <div className="grid grid-cols-2 gap-3">
           {buttons({ hrefs, googleReviewUrl }).map((b) => {

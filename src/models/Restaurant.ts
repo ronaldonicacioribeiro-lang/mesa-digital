@@ -28,6 +28,8 @@ const RestaurantSchema = new Schema(
     // PIN do atendente (guardado embaralhado) para confirmar o resgate do prêmio.
     staffPinHash: { type: String, default: "" },
     contactEmail: { type: String, default: "" }, // contato para pedidos de privacidade (LGPD)
+    // Validação de presença (opcional): IPs públicos do Wi-Fi do restaurante. Vazio = desligado.
+    presence: { allowedIps: { type: [String], default: [] } },
     active: { type: Boolean, default: true },
   },
   { timestamps: true },

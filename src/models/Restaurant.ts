@@ -20,6 +20,14 @@ const RestaurantSchema = new Schema(
       ssid: { type: String, default: "" },
       password: { type: String, default: "" },
     },
+    // Cartão fidelidade: quantos carimbos para ganhar e qual é o prêmio.
+    loyalty: {
+      stampsRequired: { type: Number, default: 9 },
+      reward: { type: String, default: "" },
+    },
+    // PIN do atendente (guardado embaralhado) para confirmar o resgate do prêmio.
+    staffPinHash: { type: String, default: "" },
+    contactEmail: { type: String, default: "" }, // contato para pedidos de privacidade (LGPD)
     active: { type: Boolean, default: true },
   },
   { timestamps: true },

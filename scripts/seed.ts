@@ -1,6 +1,7 @@
 // Carrega dois restaurantes FICTÍCIOS (uma hamburgueria e um restaurante).
 // Rodar: npm run seed   (pode rodar várias vezes: não duplica e mantém os tokens das mesas)
 import { randomBytes } from "node:crypto";
+import { scryptSync } from "node:crypto";
 import mongoose from "mongoose";
 import { Restaurant } from "../src/models/Restaurant";
 import { Table } from "../src/models/Table";
@@ -33,6 +34,8 @@ const restaurants = [
     instagram: "https://instagram.com/brasaebun.exemplo",
     googleReviewUrl: "https://search.google.com/local/writereview?placeid=EXEMPLO",
     wifi: { ssid: "BrasaBun_Clientes", password: "burger2026" },
+    loyalty: { stampsRequired: 9, reward: "Um brownie com sorvete por conta da casa" },
+    contactEmail: "contato@brasaebun.exemplo",
     tables: 12,
     items: [
       { category: "Hambúrgueres", name: "Brasa Clássico", description: "Blend 160 g, queijo prato, alface, tomate e molho da casa.", price: 32, featured: true },
@@ -55,6 +58,8 @@ const restaurants = [
     instagram: "https://instagram.com/villaverde.exemplo",
     googleReviewUrl: "https://search.google.com/local/writereview?placeid=EXEMPLO",
     wifi: { ssid: "VillaVerde_Guest", password: "sabor2026" },
+    loyalty: { stampsRequired: 9, reward: "Uma sobremesa à escolha por conta da casa" },
+    contactEmail: "contato@villaverde.exemplo",
     tables: 20,
     items: [
       { category: "Entradas", name: "Bruschetta de Tomate", description: "Pão italiano, tomate fresco, manjericão e azeite extravirgem.", price: 28 },
@@ -70,6 +75,10 @@ const restaurants = [
   },
 ];
 
+// PIN do atendente de DEMONSTRAÇÃO. Num cliente real, defina outro (nunca deixe no repositório).
+const DEMO_PIN = process.env.DEMO_STAFF_PIN ?? "1234";
+const hashPin = (pin: string, slug: string) => scryptSync(pin, `pin:${slug}`, 32).toString("hex");
+
 const novoToken = () => randomBytes(9).toString("base64url"); // 12 caracteres, difícil de adivinhar
 
 async function main() {
@@ -79,7 +88,7 @@ async function main() {
 
   for (const r of restaurants) {
     const { tables, items, ...dados } = r;
-    const rest = await Restaurant.findOneAndUpdate({ slug: dados.slug }, dados, {
+    const rest = await Restaurant.findOneAndUpdate({ slug: dados.slug }, { ...dados, staffPinHash: hashPin(DEMO_PIN, dados.slug) }, {
       upsert: true,
       returnDocument: "after",
       setDefaultsOnInsert: true,

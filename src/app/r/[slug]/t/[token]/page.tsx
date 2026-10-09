@@ -37,6 +37,8 @@ async function Mesa({ params }: { params: Params }) {
         menu: `${base}/cardapio`,
         feedback: `${base}/feedback`,
         game: `${base}/jogo`,
+        loyalty: `${base}/fidelidade`,
+        wifi: restaurant.wifi?.ssid ? `${base}/wifi` : undefined,
       }}
       colors={restaurant.colors}
     />

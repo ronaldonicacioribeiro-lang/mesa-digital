@@ -8,7 +8,7 @@ type Props = {
   tableNumber: number;
   instagram: string;
   googleReviewUrl: string;
-  hrefs: { menu: string; feedback: string; game: string };
+  hrefs: { menu: string; feedback: string; game: string; loyalty: string; wifi?: string };
   colors: { primary: string; secondary: string; background: string; text: string };
 };
 
@@ -19,7 +19,7 @@ function buttons({ hrefs, googleReviewUrl }: Pick<Props, "hrefs" | "googleReview
   return [
     { icon: "receipt", label: "Pedir a conta" },
     { icon: "book", label: "Ver cardápio", href: hrefs.menu },
-    { icon: "star", label: "Cartão fidelidade" },
+    { icon: "star", label: "Cartão fidelidade", href: hrefs.loyalty },
     // Google: link direto para o formulário de avaliação, igual para todos os clientes.
     { icon: "chat", label: "Avaliar no Google", href: googleReviewUrl || undefined, external: true },
     { icon: "mail", label: "Feedback anônimo", href: hrefs.feedback },
@@ -116,18 +116,18 @@ export function MesaHome({ name, tagline, logoText, tableNumber, instagram, goog
           })}
         </div>
 
-        <button
-          type="button"
-          disabled
-          className={`${tile} min-h-16 w-full flex-row`}
-          style={{ borderColor: `${c.primary}33`, color: c.text }}
-        >
-          <span style={{ color: c.primary }}>
-            <Icon name="wifi" className="h-6 w-6" />
-          </span>
-          Conectar ao Wi-Fi
-          <SoonBadge color={c.primary} />
-        </button>
+        {hrefs.wifi && (
+          <Link
+            href={hrefs.wifi}
+            className={`${tile} min-h-16 w-full flex-row`}
+            style={{ borderColor: `${c.primary}33`, color: c.text }}
+          >
+            <span style={{ color: c.primary }}>
+              <Icon name="wifi" className="h-6 w-6" />
+            </span>
+            Conectar ao Wi-Fi
+          </Link>
+        )}
       </section>
 
       {instagram && (
